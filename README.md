@@ -19,6 +19,10 @@ npm test
 
 Set a controlled phone number in `.env`. The test creates a user and a trial lesson on stage.
 
+## CI
+
+The GitHub Actions workflow can be started manually and runs every night at 02:00 UTC. Add `TEST_PHONE` as a repository secret before running it.
+
 ## Demo
 
 [Playwright test run](docs/playwright-test-run.webm)
