@@ -1,5 +1,7 @@
 # Charlie quiz test
 
+[![Playwright tests](https://github.com/testomut/allright-qa-automation/actions/workflows/playwright.yml/badge.svg)](https://github.com/testomut/allright-qa-automation/actions/workflows/playwright.yml)
+
 Playwright test for the Charlie registration flow:
 
 1. Complete the quiz.
