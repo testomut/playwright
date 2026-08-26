@@ -19,6 +19,7 @@ const CHILD_NAME = 'Test Child';
 const PARENT_NAME = 'Test Parent';
 const CHILD_NAME_INPUT = 'дитини';
 const PARENT_OPTION = 'Я — мати або батько';
+const LOAD_ERROR = 'Помилка завантаження';
 const IGNORED_BUTTONS = [
   ...NEXT_BUTTONS,
   'Вимкнути звук відео',
@@ -35,36 +36,55 @@ export class QuizPage {
   constructor(private readonly page: Page) {}
 
   async open(): Promise<void> {
-    await this.page.goto(QUIZ_URL);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await this.page.goto(QUIZ_URL, { waitUntil: 'domcontentloaded' });
+      await this.page.waitForTimeout(1_000);
+
+      if (!(await this.page.getByText(LOAD_ERROR, { exact: true }).isVisible())) return;
+    }
+
+    throw new Error('Quiz failed to load after three attempts');
   }
 
   async passQuiz(expectedSteps?: number): Promise<void> {
     this.expectedQuizSteps = expectedSteps;
+    let currentStep = '';
+    const selectedAnswers = new Set<string>();
 
-    for (let attempt = 0; attempt < 30; attempt++) {
+    for (let attempt = 0; attempt < 60; attempt++) {
+      const step = await this.currentStep();
+      if (step !== currentStep) {
+        currentStep = step;
+        selectedAnswers.clear();
+      }
+
       const input = this.page.locator(FORM_INPUTS).filter({ visible: true });
       if (await input.count()) {
         const placeholder = (await input.first().getAttribute('placeholder')) ?? '';
         if (!placeholder.includes(CHILD_NAME_INPUT)) return;
         await input.first().fill(CHILD_NAME);
-        await this.clickButton(NEXT_BUTTONS);
+        await expect.poll(() => this.clickButton(NEXT_BUTTONS)).toBe(true);
         this.quizSteps++;
         continue;
       }
 
-      const currentUrl = this.page.url();
-      const answer = await this.firstAnswer();
+      if (await this.clickButton(NEXT_BUTTONS)) {
+        this.quizSteps++;
+        continue;
+      }
+
+      const answer = await this.firstAnswer(selectedAnswers);
 
       if (answer) {
-        await answer.click();
-        this.quizSteps++;
-        await this.page.waitForTimeout(300);
-
-        if (this.page.url() === currentUrl) await this.clickButton(NEXT_BUTTONS);
-      } else if (!(await this.clickButton(NEXT_BUTTONS))) {
-        await this.page.waitForTimeout(500);
+        selectedAnswers.add((await answer.innerText()).trim());
+        await answer.click({ timeout: 5_000 });
+        await this.page.waitForTimeout(200);
+      } else {
+        throw new Error(`No actionable quiz control found at ${this.page.url()}`);
       }
     }
+
+    throw new Error('Quiz did not reach the registration form within 60 interactions');
   }
 
   async checkQuizPassed(): Promise<void> {
@@ -89,9 +109,7 @@ export class QuizPage {
 
     this.registrationResponse = await registration;
 
-    const skipEmail = this.page.getByText(SKIP_EMAIL, { exact: true }).first();
-    await skipEmail.waitFor({ state: 'visible' });
-    await skipEmail.click();
+    await this.page.getByText(SKIP_EMAIL, { exact: true }).first().click();
   }
 
   async checkRegistration(): Promise<void> {
@@ -133,13 +151,23 @@ export class QuizPage {
     await expect(this.page.getByText(TRIAL_LESSON).first()).toBeVisible();
   }
 
-  private async firstAnswer(): Promise<Locator | undefined> {
+  private async firstAnswer(selectedAnswers: Set<string>): Promise<Locator | undefined> {
     const buttons = this.page.getByRole('button').filter({ visible: true });
     for (let index = 0; index < await buttons.count(); index++) {
       const button = buttons.nth(index);
       const text = (await button.innerText()).trim();
-      if (text && !IGNORED_BUTTONS.includes(text) && (await this.isEnabled(button))) return button;
+      if (
+        text &&
+        !selectedAnswers.has(text) &&
+        !IGNORED_BUTTONS.includes(text) &&
+        (await this.isEnabled(button))
+      ) return button;
     }
+  }
+
+  private async currentStep(): Promise<string> {
+    const progress = this.page.getByText(/^\d+\s*\/\s*\d+$/).first();
+    return (await progress.textContent().catch(() => '')) ?? '';
   }
 
   private async fillCurrentInput(value: string): Promise<void> {
@@ -159,7 +187,7 @@ export class QuizPage {
         .filter({ visible: true })
         .first();
       if (!(await this.isEnabled(button))) continue;
-      await button.click();
+      await button.click({ timeout: 5_000 });
       await this.page.waitForTimeout(300);
       return true;
     }

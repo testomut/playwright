@@ -17,7 +17,7 @@ Copy-Item .env.example .env
 npm test
 ```
 
-Set a controlled phone number in `.env`. The test creates a user and a trial lesson on stage.
+Set a controlled phone-number template in `.env`. The test replaces its last seven digits on each run so that stage registration receives a new user. Use only a number range reserved for test data. The test creates a user and a trial lesson on stage.
 
 ## CI
 
