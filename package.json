@@ -1,0 +1,26 @@
+{
+  "name": "wikipedia-language-aqa",
+  "version": "1.0.0",
+  "description": "AQA test task: an authorised Wikipedia user switches the interface language in Preferences (Playwright + TypeScript, Docker).",
+  "license": "MIT",
+  "author": "Stanislav Mokshyn <https://github.com/testomut>",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "docker:build": "docker compose build",
+    "docker:test": "docker compose run --rm tests"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^20.12.12",
+    "dotenv": "^16.4.5",
+    "typescript": "~6.0.3"
+  }
+}
+
