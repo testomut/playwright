@@ -1,0 +1,11 @@
+services:
+  tests:
+    build: .
+    image: wikipedia-language-aqa
+    env_file:
+      - .env
+    volumes:
+      - ./playwright-report:/app/playwright-report
+      - ./test-results:/app/test-results
+    ipc: host
+
