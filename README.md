@@ -1,3 +1,13 @@
+> **The projects live in their own repositories again:**
+> [playwrightQaseTests](https://github.com/testomut/playwrightQaseTests) ·
+> [PixiJsE2EPlaywright](https://github.com/testomut/PixiJsE2EPlaywright) ·
+> [CasinoAutoOauthPlaywright](https://github.com/testomut/CasinoAutoOauthPlaywright) ·
+> [WikiAutoTestsPlaywright](https://github.com/testomut/WikiAutoTestsPlaywright) ·
+> [allright-qa-automation](https://github.com/testomut/allright-qa-automation) ·
+> [wikipedia-language-aqa](https://github.com/testomut/wikipedia-language-aqa) ·
+> [python-playwright-qa-framework](https://github.com/testomut/python-playwright-qa-framework).
+> This repository is an archived snapshot.
+
 # Playwright projects
 
 Test automation projects built with Playwright, grouped by language. Each folder is a complete, independent
