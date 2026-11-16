@@ -1,0 +1,45 @@
+{
+    "name": "playwright-qase-tests",
+    "version": "1.0.0",
+    "description": "Playwright and Qase test framework architecture sample, adapted from a real project.",
+    "license": "MIT",
+    "author": "Stanislav Mokshyn <https://github.com/testomut>",
+    "keywords": [
+        "playwright",
+        "typescript",
+        "test-automation",
+        "qase",
+        "page-object-model"
+    ],
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "typecheck": "tsc --noEmit",
+        "test:setup": "playwright test --grep \"@START\" --config=playwright.no-setup.config.ts",
+        "test": "playwright test --grep \"@QATEST-\"",
+        "test:headed": "npm run test -- --headed",
+        "test:debug": "npm run test -- --debug",
+        "test:qase": "cross-env QASE_MODE=testops npm run test"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@playwright/test": "^1.62.1",
+        "@types/node": "^20.12.12",
+        "async-mutex": "^0.5.0",
+        "cross-env": "^7.0.3",
+        "dotenv": "^16.4.5",
+        "eslint": "^10.8.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-playwright": "^2.11.0",
+        "form-data": "^4.0.6",
+        "imap-simple": "^1.6.3",
+        "mailparser": "^3.9.14",
+        "pdf-parse": "^1.1.1",
+        "playwright-qase-reporter": "^2.6.0",
+        "prettier": "^3.9.6",
+        "typescript": "~6.0.3",
+        "typescript-eslint": "^8.66.0"
+    }
+}
