@@ -1,0 +1,102 @@
+name: Playwright E2E
+
+# The Pixi.js application lives in a separate repository
+# (testomut/pixijs-e2e-testing-demo). This workflow checks out that repo's
+# demo-app and starts it locally via its own Vite dev server (which also
+# serves the mocked /api/game/spin endpoint), rather than testing the
+# public Vercel deployment - see README "CI: why a local checkout, not
+# the deployed demo" for the trade-off.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  APP_REPO: testomut/pixijs-e2e-testing-demo
+
+jobs:
+  e2e:
+    name: Lint, typecheck, and Playwright
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Playwright project
+        uses: actions/checkout@v4
+
+      - name: Checkout application repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.APP_REPO }}
+          path: app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            app/demo-app/package-lock.json
+
+      - name: Install Playwright project dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Install application dependencies
+        run: npm ci
+        working-directory: app/demo-app
+
+      - name: Start application
+        run: npm run dev &
+        working-directory: app/demo-app
+
+      - name: Wait for application to be reachable
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "Application is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Application did not become reachable in time" >&2
+          exit 1
+
+      - name: Run Playwright suite
+        run: npm test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Playwright failure artifacts
+        # test-results/ holds per-test screenshots, traces, and - since
+        # `video: "retain-on-failure"` in playwright.config.ts - videos for
+        # exactly the tests that failed. RECORD_VIDEO is never set here, so
+        # a normal successful CI run never records video for every test.
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-artifacts
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
