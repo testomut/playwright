@@ -1,0 +1,35 @@
+{
+  "email": "owner0@example.com",
+  "password": "ExamplePass_1",
+  "firstName": "John",
+  "lastName": "Doe",
+  "account": "ExampleOrg0",
+  "phone": "2025550100",
+  "businessNumber": "(202) 555-0101",
+  "trialNumber": "(202) 555-0102",
+  "token": "",
+  "created": true,
+  "organizationId": 10000,
+  "schemaVersion": 2,
+  "member": {
+    "email": "member0@example.com",
+    "firstName": "Jane",
+    "lastName": "Roe",
+    "phone": "2025550103",
+    "password": "ExamplePass_1",
+    "url": ""
+  },
+  "protected": {
+    "numbers": [
+      {
+        "role": "business",
+        "type": "local",
+        "id": 1,
+        "e164": "+12025550101",
+        "formatted": "(202) 555-0101",
+        "national": "202-555-0101"
+      }
+    ],
+    "inboxes": ["Main inbox", "Demo Inbox"]
+  }
+}
